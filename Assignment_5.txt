@@ -1,0 +1,39 @@
+%sql
+create table customers
+(
+cust_id int,
+products array<string>,
+price array<int>
+)
+
+%sql
+insert into customers values (1111,array('a','b','c','d','e'),array(100,200,300,400,500))
+
+%sql
+insert into customers values (1112,array('c','d','e','a','a'),array(110,120,130,140,150))
+
+%sql
+SELECT cust_id, product_exp, price_exp
+FROM customers
+LATERAL VIEW posexplode(products) exploded AS pos, product_exp
+LATERAL VIEW posexplode(price) exploded2 AS pos2, price_exp
+where pos=pos2
+
+%sql
+create table customer_expl
+(
+customerid int,
+products string,
+price int)
+
+%sql
+insert into customer_expl values (1111,'a',100),(1111,'b',200),(1111,'c',300),(1111,'d',400),(1111,'e',500);
+insert into customer_expl values (1112,'c',110),(1112,'d',120),(1112,'e',130),(1112,'a',140),(1112,'a',150);
+
+%sql
+SELECT customerid, collect_list(products),collect_list(price) from customer_expl
+GROUP BY customerid
+
+%sql
+SELECT customerid, collect_set(products),collect_set(price) from customer_expl
+GROUP BY customerid
